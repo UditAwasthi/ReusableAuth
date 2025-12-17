@@ -1,6 +1,7 @@
 import mongoose, { mongo, Schema } from "mongoose";
 
-const userSchema = new Schema({
+const userSchema = new Schema(
+    {
     avatar: {
         type: {
             url: String,
@@ -47,6 +48,8 @@ const userSchema = new Schema({
     forgotPasswordExpiry:{
         type:Date
     }
-})
+
+},{timestamps:true},
+)
 
 export const user = mongoose.model("User", userSchema);
