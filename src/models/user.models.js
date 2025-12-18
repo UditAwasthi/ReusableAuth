@@ -2,6 +2,8 @@ import mongoose, { mongo, Schema } from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+
+
 const userSchema = new Schema(
     {
         avatar: {
@@ -48,6 +50,12 @@ const userSchema = new Schema(
             type: String,
         },
         forgotPasswordExpiry: {
+            type: Date
+        },
+        emailVerificationToken: {
+            type: String,
+        },
+        emailVerificationExpiry: {
             type: Date
         }
 
