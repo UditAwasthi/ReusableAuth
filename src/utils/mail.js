@@ -14,7 +14,8 @@ const sendEmail = async (options) => {
     )
     const emailHtml = mailGenerator.generate(options.mailgenContent)
     const emailTextual = mailGenerator.generatePlaintext(options.mailgenContent)
-    nodemailer.createTransport({
+
+    const transporter = nodemailer.createTransport({
         host: process.env.MAILTRAP_SMTP_HOST,
         port: process.env.MAILTRAP_SMTP_PORT,
         auth: {
@@ -26,13 +27,13 @@ const sendEmail = async (options) => {
     const mail = {
         from: "mail.taslmanager@example.com",
         to: options.email,
-        subject: isObjectIdOrHexString.subject,
+        subject: options.subject,
         text: emailTextual,
         html: emailHtml
     }
 
     try {
-        await transporter.sendEmail(mail)
+        await transporter.sendMail(mail)
     } catch (error) {
         console.error(error)
     }
