@@ -1,11 +1,11 @@
-import {User} from "../models/user.models.js"
+import { User } from "../models/user.models.js"
 import { ApiResponse } from "../utils/api-response.js"
 import { ApiError } from "../utils/api-error.js"
 import { asyncHandler } from "../utils/async-handler.js"
 import { emailVerifactionMailgenContent, sendEmail } from "../utils/mail.js"
 const generateAccessAndRefreshTokens = async (userId) => {
     try {
-        const user = await User.findOne({_id:userId})
+        const user = await User.findOne({ _id: userId })
         const accessToken = user.generateAccessToken();
         const refreshToken = user.generateRefreshToken();
 
@@ -69,4 +69,46 @@ const registerUser = asyncHandler(async (req, res) => {
 }
 )
 
-export {registerUser};
+const login = asyncHandler(async (req, res) => {
+    const { email, password } = req.body;
+    if (!email) {
+        throw new ApiError(400, "Please provide email to login")
+    }
+    const user = await User.findOne({ email })
+    if (!user) {
+        throw ApiError(400, "User not found with this email")
+    }
+
+    const isPasswordValid = await user.isPasswordCorrect(password);
+    if (!isPasswordValid) {
+        throw ApiError(400, "Password is not Valid!")
+    }
+
+    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id)
+    const loggedInUser = await User.findById(user._id).select(
+        "-password -refreshToken -emailVerificationToken -emailverificationExpiry",
+    )
+    const Options = {
+        httpOnly: true,
+        secure: true
+    }
+
+    return res
+    .status(200)
+    .cookie("accessToken",accessToken,Options)
+    .cookie("refreshToken",refreshToken,Options)
+    .json(
+        new ApiResponse(
+            200,
+            {
+                user:loggedInUser,
+                accessToken,
+                refreshToken
+            },
+            "User Looged in SuccessFully"
+        )
+    )
+
+})
+
+export { registerUser, login };
